@@ -352,18 +352,26 @@ class KeithleyGuiApp(QtWidgets.QMainWindow):
         self.realtime_voltage.setValue(0)
         self.realtime_voltage.setSuffix(" V")
         self.realtime_voltage.setSingleStep(0.1)  # 步进值为0.1V
+        self.realtime_voltage.setKeyboardTracking(False)  # 禁用实时更新，等待回车键
+        self.realtime_voltage.editingFinished.connect(self.on_voltage_editing_finished)  # 添加回车键响应
+        
+        # 添加应用按钮
+        self.apply_voltage_button = QtWidgets.QPushButton("应用电压")
+        self.apply_voltage_button.clicked.connect(self.on_apply_voltage_clicked)
         
         # 添加快速电压增减按钮
         self.voltage_up_button = QtWidgets.QPushButton("+1V")
         self.voltage_down_button = QtWidgets.QPushButton("-1V")
         self.voltage_zero_button = QtWidgets.QPushButton("0V")
+        self.voltage_up_small_button = QtWidgets.QPushButton("+0.1V")
+        self.voltage_down_small_button = QtWidgets.QPushButton("-0.1V")
         
         voltage_buttons_layout = QtWidgets.QHBoxLayout()
         voltage_buttons_layout.addWidget(self.voltage_down_button)
+        voltage_buttons_layout.addWidget(self.voltage_down_small_button)
         voltage_buttons_layout.addWidget(self.voltage_zero_button)
+        voltage_buttons_layout.addWidget(self.voltage_up_small_button)
         voltage_buttons_layout.addWidget(self.voltage_up_button)
-        
-        voltage_control_layout.addWidget(self.realtime_voltage)
         
         realtime_form.addRow("测量SMU:", self.realtime_smu)
         realtime_form.addRow("更新间隔:", self.realtime_interval)
@@ -391,10 +399,27 @@ class KeithleyGuiApp(QtWidgets.QMainWindow):
         self.pushButtonStartRealtime = QtWidgets.QPushButton("开始实时测量")
         self.pushButtonStopRealtime = QtWidgets.QPushButton("停止实时测量")
         self.pushButtonStopRealtime.setEnabled(False)
+        self.pushButtonSaveRealtime = QtWidgets.QPushButton("保存实时数据")
+        self.pushButtonSaveRealtime.setEnabled(False)
+        self.pushButtonExportRealtime = QtWidgets.QPushButton("导出当前图")
+        self.pushButtonExportRealtime.setEnabled(False)
+        self.pushButtonClearRealtime = QtWidgets.QPushButton("清除图表")
+        self.pushButtonClearRealtime.setEnabled(False)
         
-        realtime_buttons.addWidget(self.pushButtonStartRealtime)
-        realtime_buttons.addWidget(self.pushButtonStopRealtime)
-        realtime_layout.addLayout(realtime_buttons)
+        realtime_buttons_row1 = QtWidgets.QHBoxLayout()
+        realtime_buttons_row1.addWidget(self.pushButtonStartRealtime)
+        realtime_buttons_row1.addWidget(self.pushButtonStopRealtime)
+        
+        realtime_buttons_row2 = QtWidgets.QHBoxLayout()
+        realtime_buttons_row2.addWidget(self.pushButtonSaveRealtime)
+        realtime_buttons_row2.addWidget(self.pushButtonExportRealtime)
+        realtime_buttons_row2.addWidget(self.pushButtonClearRealtime)
+        
+        realtime_buttons_layout = QtWidgets.QVBoxLayout()
+        realtime_buttons_layout.addLayout(realtime_buttons_row1)
+        realtime_buttons_layout.addLayout(realtime_buttons_row2)
+        
+        realtime_layout.addLayout(realtime_buttons_layout)
         
         # 实时测量线程
         self.realtime_thread = None
@@ -516,11 +541,16 @@ class KeithleyGuiApp(QtWidgets.QMainWindow):
         # 实时测量控件绑定
         self.pushButtonStartRealtime.clicked.connect(self.on_start_realtime_clicked)
         self.pushButtonStopRealtime.clicked.connect(self.on_stop_realtime_clicked)
+        self.pushButtonSaveRealtime.clicked.connect(self.on_save_realtime_clicked)
+        self.pushButtonExportRealtime.clicked.connect(self.on_export_realtime_clicked)
+        self.pushButtonClearRealtime.clicked.connect(self.on_clear_realtime_clicked)
         
-        # 电压调节按钮绑定
+        # 电压控制和调节按钮绑定
         self.voltage_up_button.clicked.connect(self.on_voltage_up_clicked)
         self.voltage_down_button.clicked.connect(self.on_voltage_down_clicked)
         self.voltage_zero_button.clicked.connect(self.on_voltage_zero_clicked)
+        self.voltage_up_small_button.clicked.connect(self.on_voltage_up_small_clicked)
+        self.voltage_down_small_button.clicked.connect(self.on_voltage_down_small_clicked)
 
     # =============================================================================
     # Measurement callbacks
@@ -842,9 +872,16 @@ class KeithleyGuiApp(QtWidgets.QMainWindow):
         if not simulation_mode:
             # 真实设备模式
             try:
-                # 应用电压
+                # 获取SMU对象
                 smu = getattr(self.keithley, smu_name)
-                self.keithley.apply_voltage(smu, voltage)
+                
+                # 直接使用SMU对象设置电压，确保输出打开
+                smu.source.func = smu.SOURCE_VOLTAGE  # 设置为电压源模式
+                smu.source.levelv = voltage  # 设置电压值
+                smu.source.output = smu.OUTPUT_ON  # 打开输出
+                
+                print(f"已应用电压: {voltage}V 到 {smu_name}")
+                self.statusBar.showMessage(f"    已应用电压: {voltage}V 到 {smu_name}")
             except Exception as e:
                 QtWidgets.QMessageBox.information(
                     self, "设置错误", f"设置电压时出错: {str(e)}"
@@ -870,6 +907,16 @@ class KeithleyGuiApp(QtWidgets.QMainWindow):
         # 更新UI状态
         self.pushButtonStartRealtime.setEnabled(False)
         self.pushButtonStopRealtime.setEnabled(True)
+        
+        # 更新导出和清除按钮状态
+        # 初始时禁用导出和保存按钮，需要至少有足够数据才能使用
+        if hasattr(self, 'pushButtonSaveRealtime'):
+            self.pushButtonSaveRealtime.setEnabled(False)
+        if hasattr(self, 'pushButtonExportRealtime'):
+            self.pushButtonExportRealtime.setEnabled(False)
+        if hasattr(self, 'pushButtonClearRealtime'):
+            self.pushButtonClearRealtime.setEnabled(True)  # 清除按钮保持启用
+            
         self.realtime_smu.setEnabled(False)
         self.realtime_interval.setEnabled(False)
         
@@ -888,7 +935,7 @@ class KeithleyGuiApp(QtWidgets.QMainWindow):
         if simulation_mode:
             self.statusBar.showMessage("    正在进行模拟测量...")
         else:
-            self.statusBar.showMessage("    正在进行实时测量...")
+            self.statusBar.showMessage(f"    正在进行实时测量，电压: {voltage}V")
             
     @QtCore.pyqtSlot(float)
     def on_voltage_changed(self, new_voltage):
@@ -928,48 +975,58 @@ class KeithleyGuiApp(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot()
     def on_stop_realtime_clicked(self):
         """停止实时测量"""
-        if self.realtime_thread and self.realtime_thread.isRunning():
-            self.realtime_thread.stop()
-            self.statusBar.showMessage("    正在停止实时测量...")
-    
-    @QtCore.pyqtSlot(object)
-    def on_realtime_data(self, data):
-        """处理实时测量数据"""
-        try:
-            # 更新界面显示的实时值
-            t, v, i = data["last_value"]
-            self.realtime_time_label.setText(f"{t:.2f} s")
-            self.realtime_voltage_label.setText(f"{v:.6f} V")
-            self.realtime_current_label.setText(f"{i:.6e} A")
+        if hasattr(self, 'realtime_thread') and self.realtime_thread.isRunning():
+            # 停止线程
+            self.realtime_thread.running = False
+            self.realtime_thread.wait()  # 等待线程终止
             
-            # 更新图表
-            if len(data["time"]) > 1:  # 至少有两个点才能画图
-                # 绘制时间-电流曲线
-                self.canvas.clear()
-                self.canvas.plot_xy(data["time"], data["current"], "时间 (s)", "电流 (A)", "实时电流")
-        except Exception as e:
-            print(f"处理实时数据时出错: {str(e)}")
-    
-    @QtCore.pyqtSlot(object)
-    def on_realtime_error(self, exc):
-        """处理实时测量错误"""
-        try:
-            self.statusBar.showMessage("    测量出错.")
-            QtWidgets.QMessageBox.information(
-                self, "实时测量错误", f"{exc.__class__.__name__}: {exc.args[0]}"
-            )
-            self._reset_realtime_ui()
-        except Exception as e:
-            print(f"处理实时测量错误时出错: {str(e)}")
-            self.statusBar.showMessage("    测量出错.")
-            self._reset_realtime_ui()
-    
+            # 更新UI状态
+            self.pushButtonStartRealtime.setEnabled(True)
+            self.pushButtonStopRealtime.setEnabled(False)
+            
+            # 禁用保存和清除按钮，但保持导出按钮可用（允许导出已收集的数据）
+            if hasattr(self, 'pushButtonSaveRealtime'):
+                self.pushButtonSaveRealtime.setEnabled(False)
+            if hasattr(self, 'pushButtonClearRealtime'):
+                self.pushButtonClearRealtime.setEnabled(True)  # 保持可用以清除图表
+            
+            self.realtime_smu.setEnabled(True)
+            self.realtime_interval.setEnabled(True)
+            
+            # 断开电压改变时的回调函数
+            if hasattr(self, 'voltage_value_changed_connected'):
+                try:
+                    self.realtime_voltage.valueChanged.disconnect(self.on_voltage_changed)
+                except TypeError:
+                    pass  # 如果没有连接，则会引发TypeError
+                self.voltage_value_changed_connected = False
+            
+            self.statusBar.showMessage("    实时测量已停止")
+            
     @QtCore.pyqtSlot()
     def on_realtime_finished(self):
         """实时测量结束后的处理"""
         try:
-            self.statusBar.showMessage("    Ready.")
-            self._reset_realtime_ui()
+            self.statusBar.showMessage("    实时测量已结束")
+            
+            # 更新UI状态
+            self.pushButtonStartRealtime.setEnabled(True)
+            self.pushButtonStopRealtime.setEnabled(False)
+            
+            # 根据是否有数据来设置导出和保存按钮状态
+            has_data = (hasattr(self, 'realtime_thread') and 
+                       hasattr(self.realtime_thread, 'time_data') and 
+                       len(self.realtime_thread.time_data) >= 5)
+                       
+            if hasattr(self, 'pushButtonSaveRealtime'):
+                self.pushButtonSaveRealtime.setEnabled(has_data)
+            if hasattr(self, 'pushButtonExportRealtime'):
+                self.pushButtonExportRealtime.setEnabled(has_data)
+            if hasattr(self, 'pushButtonClearRealtime'):
+                self.pushButtonClearRealtime.setEnabled(has_data)
+            
+            self.realtime_smu.setEnabled(True)
+            self.realtime_interval.setEnabled(True)
             
             # 检查是否需要关闭设备输出
             if (hasattr(self, 'realtime_thread') and 
@@ -983,31 +1040,448 @@ class KeithleyGuiApp(QtWidgets.QMainWindow):
                         if smu_name != "--":
                             smu = getattr(self.keithley, smu_name)
                             smu.source.output = smu.OUTPUT_OFF
+                            print(f"已关闭 {smu_name} 的输出")
                     except Exception as e:
                         print(f"关闭输出时出错: {str(e)}")
+                        
+            # 断开电压改变时的回调函数
+            if hasattr(self, 'voltage_value_changed_connected') and self.voltage_value_changed_connected:
+                try:
+                    self.realtime_voltage.valueChanged.disconnect(self.on_voltage_changed)
+                except TypeError:
+                    pass  # 如果没有连接，则会引发TypeError
+                self.voltage_value_changed_connected = False
+                
         except Exception as e:
             print(f"实时测量结束处理时出错: {str(e)}")
             try:
-                self._reset_realtime_ui()
+                # 强制重置UI
+                self.pushButtonStartRealtime.setEnabled(True)
+                self.pushButtonStopRealtime.setEnabled(False)
+                self.realtime_smu.setEnabled(True)
+                self.realtime_interval.setEnabled(True)
+                self.realtime_voltage.setEnabled(True)
             except:
                 pass
+
+    @QtCore.pyqtSlot()
+    def on_voltage_editing_finished(self):
+        """当电压编辑完成时调用"""
+        if hasattr(self, 'realtime_thread') and self.realtime_thread:
+            # 获取编辑后的电压值
+            new_voltage = self.realtime_voltage.value()
+            # 应用电压
+            self.on_apply_voltage_clicked()
+
+    @QtCore.pyqtSlot()
+    def on_apply_voltage_clicked(self):
+        """当应用电压按钮被点击时调用"""
+        if hasattr(self, 'realtime_thread') and self.realtime_thread:
+            # 获取选择的SMU和电压值
+            smu_name = self.realtime_smu.currentText()
+            new_voltage = self.realtime_voltage.value()
+            
+            if smu_name == "--":
+                QtWidgets.QMessageBox.information(
+                    self, "参数错误", "请选择有效的SMU"
+                )
+                return
+            
+            # 检查是否是模拟模式
+            simulation_mode = not self.keithley.connected
+            
+            if not simulation_mode:
+                # 真实设备模式
+                try:
+                    # 应用电压
+                    smu = getattr(self.keithley, smu_name)
+                    self.keithley.apply_voltage(smu, new_voltage)
+                except Exception as e:
+                    QtWidgets.QMessageBox.information(
+                        self, "设置错误", f"设置电压时出错: {str(e)}"
+                    )
+                    return
+            else:
+                # 模拟模式，显示提示信息
+                msg_box = QtWidgets.QMessageBox()
+                msg_box.setIcon(QtWidgets.QMessageBox.Information)
+                msg_box.setWindowTitle("模拟模式")
+                msg_box.setText("设备未连接，将使用模拟数据")
+                msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+                
+                if msg_box.exec_() == QtWidgets.QMessageBox.Cancel:
+                    return
+            
+            # 更新状态栏
+            self.statusBar.showMessage(f"    电压已更新: {new_voltage} V")
 
     @QtCore.pyqtSlot()
     def on_voltage_up_clicked(self):
         """增加电压1V"""
         current_value = self.realtime_voltage.value()
         self.realtime_voltage.setValue(current_value + 1.0)
+        # 自动应用电压
+        self.on_apply_voltage_clicked()
         
     @QtCore.pyqtSlot()
     def on_voltage_down_clicked(self):
         """减少电压1V"""
         current_value = self.realtime_voltage.value()
         self.realtime_voltage.setValue(current_value - 1.0)
+        # 自动应用电压
+        self.on_apply_voltage_clicked()
         
     @QtCore.pyqtSlot()
     def on_voltage_zero_clicked(self):
         """将电压设为0V"""
         self.realtime_voltage.setValue(0.0)
+        # 自动应用电压
+        self.on_apply_voltage_clicked()
+        
+    @QtCore.pyqtSlot()
+    def on_voltage_up_small_clicked(self):
+        """增加电压0.1V"""
+        current_value = self.realtime_voltage.value()
+        self.realtime_voltage.setValue(current_value + 0.1)
+        # 自动应用电压
+        self.on_apply_voltage_clicked()
+        
+    @QtCore.pyqtSlot()
+    def on_voltage_down_small_clicked(self):
+        """减少电压0.1V"""
+        current_value = self.realtime_voltage.value()
+        self.realtime_voltage.setValue(current_value - 0.1)
+        # 自动应用电压
+        self.on_apply_voltage_clicked()
+
+    @QtCore.pyqtSlot()
+    def on_export_realtime_clicked(self):
+        """导出当前实时测量数据图表"""
+        if not (self.realtime_thread and hasattr(self.realtime_thread, 'time_data')):
+            QtWidgets.QMessageBox.information(
+                self, "导出错误", "没有可导出的实时测量数据"
+            )
+            return
+            
+        # 获取实时测量数据
+        time_data = self.realtime_thread.time_data
+        voltage_data = self.realtime_thread.voltage_data
+        current_data = self.realtime_thread.current_data
+        
+        if not time_data or len(time_data) < 2:
+            QtWidgets.QMessageBox.information(
+                self, "导出错误", "没有足够的测量数据可导出"
+            )
+            return
+            
+        # 生成默认文件名（包含日期时间和电压值）
+        import datetime
+        now = datetime.datetime.now()
+        timestamp = now.strftime("%Y%m%d_%H%M%S")
+        
+        # 获取当前电压值
+        if hasattr(self, 'realtime_voltage'):
+            voltage = self.realtime_voltage.value()
+            default_filename = f"realtime_v{voltage}V_{timestamp}"
+        else:
+            default_filename = f"realtime_data_{timestamp}"
+        
+        # 展示保存格式选择对话框
+        format_dialog = QtWidgets.QMessageBox()
+        format_dialog.setIcon(QtWidgets.QMessageBox.Question)
+        format_dialog.setWindowTitle("选择导出格式")
+        format_dialog.setText("请选择数据导出格式：")
+        
+        txt_button = format_dialog.addButton("文本文件 (.txt)", QtWidgets.QMessageBox.ActionRole)
+        csv_button = format_dialog.addButton("CSV文件 (.csv)", QtWidgets.QMessageBox.ActionRole)
+        excel_button = format_dialog.addButton("Excel文件 (.xlsx)", QtWidgets.QMessageBox.ActionRole)
+        cancel_button = format_dialog.addButton("取消", QtWidgets.QMessageBox.RejectRole)
+        
+        format_dialog.exec_()
+        
+        if format_dialog.clickedButton() == cancel_button:
+            return
+            
+        # 根据用户选择的格式，设置文件扩展名和过滤器
+        if format_dialog.clickedButton() == txt_button:
+            file_ext = "txt"
+            file_filter = "文本文件 (*.txt)"
+            default_filename += ".txt"
+        elif format_dialog.clickedButton() == csv_button:
+            file_ext = "csv"
+            file_filter = "CSV文件 (*.csv)"
+            default_filename += ".csv"
+        elif format_dialog.clickedButton() == excel_button:
+            file_ext = "xlsx"
+            file_filter = "Excel文件 (*.xlsx)"
+            default_filename += ".xlsx"
+        else:
+            return
+        
+        # 显示文件保存对话框
+        filepath, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "导出数据", default_filename, file_filter
+        )
+        
+        if not filepath:
+            return
+            
+        try:
+            if file_ext == "txt":
+                # 导出为TXT文件
+                with open(filepath, 'w') as f:
+                    # 写入标题行
+                    current_voltage = self.realtime_voltage.value() if hasattr(self, 'realtime_voltage') else "未知"
+                    f.write("# 实时测量数据导出\n")
+                    f.write(f"# 导出时间: {now.strftime('%Y-%m-%d %H:%M:%S')}\n")
+                    f.write(f"# 设定电压: {current_voltage}V\n")
+                    f.write("# 列：时间(s) 电压(V) 电流(A)\n")
+                    # 写入数据
+                    for t, v, i in zip(time_data, voltage_data, current_data):
+                        f.write(f"{t:.6f} {v:.6f} {i:.6e}\n")
+            
+            elif file_ext == "csv":
+                # 导出为CSV文件
+                with open(filepath, 'w') as f:
+                    # 写入元数据
+                    current_voltage = self.realtime_voltage.value() if hasattr(self, 'realtime_voltage') else "未知"
+                    f.write(f"# 实时测量数据导出,\n")
+                    f.write(f"# 导出时间:,{now.strftime('%Y-%m-%d %H:%M:%S')},\n")
+                    f.write(f"# 设定电压:,{current_voltage}V,\n")
+                    # 写入标题行
+                    f.write("时间(s),电压(V),电流(A)\n")
+                    # 写入数据
+                    for t, v, i in zip(time_data, voltage_data, current_data):
+                        f.write(f"{t:.6f},{v:.6f},{i:.6e}\n")
+            
+            elif file_ext == "xlsx":
+                # 导出为Excel文件，需要安装pandas和openpyxl
+                try:
+                    import pandas as pd
+                    
+                    # 创建DataFrame
+                    data = {
+                        "时间(s)": time_data,
+                        "电压(V)": voltage_data,
+                        "电流(A)": current_data
+                    }
+                    df = pd.DataFrame(data)
+                    
+                    # 创建Excel writer
+                    with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
+                        # 写入数据到Excel
+                        df.to_excel(writer, sheet_name='测量数据', index=False)
+                        
+                        # 获取工作簿和工作表
+                        workbook = writer.book
+                        worksheet = writer.sheets['测量数据']
+                        
+                        # 添加元数据行
+                        current_voltage = self.realtime_voltage.value() if hasattr(self, 'realtime_voltage') else "未知"
+                        metadata = [
+                            ["实时测量数据导出"],
+                            [f"导出时间: {now.strftime('%Y-%m-%d %H:%M:%S')}"],
+                            [f"设定电压: {current_voltage}V"],
+                            []  # 空行
+                        ]
+                        
+                        # 插入元数据行
+                        worksheet.insert_rows(0, len(metadata))
+                        for i, row in enumerate(metadata):
+                            for j, value in enumerate(row):
+                                worksheet.cell(row=i+1, column=j+1, value=value)
+                        
+                except ImportError:
+                    # 如果没有安装pandas，提示用户
+                    QtWidgets.QMessageBox.warning(
+                        self, 
+                        "缺少依赖", 
+                        "导出Excel格式需要安装pandas和openpyxl库。\n正在改为导出CSV格式..."
+                    )
+                    
+                    # 改为导出CSV格式
+                    with open(filepath.replace(".xlsx", ".csv"), 'w') as f:
+                        # 写入元数据
+                        current_voltage = self.realtime_voltage.value() if hasattr(self, 'realtime_voltage') else "未知"
+                        f.write(f"# 实时测量数据导出,\n")
+                        f.write(f"# 导出时间:,{now.strftime('%Y-%m-%d %H:%M:%S')},\n")
+                        f.write(f"# 设定电压:,{current_voltage}V,\n")
+                        # 写入标题行
+                        f.write("时间(s),电压(V),电流(A)\n")
+                        # 写入数据
+                        for t, v, i in zip(time_data, voltage_data, current_data):
+                            f.write(f"{t:.6f},{v:.6f},{i:.6e}\n")
+                    
+                    # 更新文件路径
+                    filepath = filepath.replace(".xlsx", ".csv")
+            
+            # 导出成功后显示消息
+            self.statusBar.showMessage(f"    数据已导出到: {filepath}")
+            
+            # 询问是否打开文件所在文件夹
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setIcon(QtWidgets.QMessageBox.Question)
+            msg_box.setWindowTitle("打开文件位置")
+            msg_box.setText(f"数据已导出到:\n{filepath}\n\n是否打开文件所在文件夹？")
+            msg_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+            
+            if msg_box.exec_() == QtWidgets.QMessageBox.Yes:
+                import os
+                import subprocess
+                
+                # 获取文件所在目录
+                file_dir = os.path.dirname(os.path.abspath(filepath))
+                
+                # 根据操作系统打开文件夹
+                if os.name == 'nt':  # Windows
+                    os.startfile(file_dir)
+                elif os.name == 'posix':  # macOS, Linux
+                    try:
+                        subprocess.Popen(['xdg-open', file_dir])
+                    except:
+                        try:
+                            subprocess.Popen(['open', file_dir])
+                        except:
+                            pass
+                        
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(
+                self, "导出错误", f"导出数据时出错:\n{str(e)}"
+            )
+            
+    @QtCore.pyqtSlot()
+    def on_clear_realtime_clicked(self):
+        """清除实时测量图表并重新开始收集数据"""
+        # 检查是否有正在运行的实时测量线程
+        if not hasattr(self, 'realtime_thread') or not self.realtime_thread:
+            QtWidgets.QMessageBox.information(
+                self, "清除错误", "没有实时测量线程"
+            )
+            return
+            
+        # 判断是否正在测量
+        if self.realtime_thread.isRunning():
+            # 清除图表
+            self.canvas.clear()
+            
+            # 清除测量线程中的数据历史
+            self.realtime_thread.time_data = []
+            self.realtime_thread.voltage_data = []
+            self.realtime_thread.current_data = []
+            
+            # 重置起始时间为当前时间
+            self.realtime_thread.start_time = time.time()
+            
+            # 更新状态栏
+            self.statusBar.showMessage("    图表已清除，继续测量中...")
+        else:
+            # 如果线程不在运行但存在数据，询问是否清除
+            if hasattr(self.realtime_thread, 'time_data') and self.realtime_thread.time_data:
+                msg_box = QtWidgets.QMessageBox()
+                msg_box.setIcon(QtWidgets.QMessageBox.Question)
+                msg_box.setWindowTitle("清除确认")
+                msg_box.setText("没有正在进行的测量，但有历史数据。\n是否清除图表？")
+                msg_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+                
+                if msg_box.exec_() == QtWidgets.QMessageBox.Yes:
+                    # 清除图表
+                    self.canvas.clear()
+                    
+                    # 清除历史数据
+                    self.realtime_thread.time_data = []
+                    self.realtime_thread.voltage_data = []
+                    self.realtime_thread.current_data = []
+                    
+                    # 更新状态栏
+                    self.statusBar.showMessage("    图表和历史数据已清除")
+            else:
+                # 无数据可清除
+                QtWidgets.QMessageBox.information(
+                    self, "清除错误", "没有实时测量数据可清除"
+                )
+                
+    def _on_realtime_data_reset(self):
+        """重置实时测量数据后的处理"""
+        # 更新UI状态
+        if hasattr(self, 'pushButtonStartRealtime'):
+            self.pushButtonStartRealtime.setEnabled(False)
+        if hasattr(self, 'pushButtonStopRealtime'):
+            self.pushButtonStopRealtime.setEnabled(True)
+        if hasattr(self, 'pushButtonClearRealtime'):
+            self.pushButtonClearRealtime.setEnabled(True)
+        if hasattr(self, 'pushButtonSaveRealtime'):
+            self.pushButtonSaveRealtime.setEnabled(False)  # 刚刚清除后，暂时禁用保存按钮
+        if hasattr(self, 'pushButtonExportRealtime'):
+            self.pushButtonExportRealtime.setEnabled(False)  # 刚刚清除后，暂时禁用导出按钮
+            
+        # 重新启用当数据积累到一定量时
+        QtCore.QTimer.singleShot(2000, self._enable_data_functions)
+
+    @QtCore.pyqtSlot(object)
+    def on_realtime_data(self, data):
+        """处理实时测量数据"""
+        try:
+            # 更新界面显示的实时值
+            t, v, i = data["last_value"]
+            self.realtime_time_label.setText(f"{t:.2f} s")
+            self.realtime_voltage_label.setText(f"{v:.6f} V")
+            self.realtime_current_label.setText(f"{i:.6e} A")
+            
+            # 更新图表
+            if len(data["time"]) > 1:  # 至少有两个点才能画图
+                # 限制数据点数量，避免内存问题
+                max_points = 1000  # 最大数据点数
+                if len(data["time"]) > max_points:
+                    # 只保留最新的max_points个点
+                    plot_time = data["time"][-max_points:]
+                    plot_current = data["current"][-max_points:]
+                else:
+                    plot_time = data["time"]
+                    plot_current = data["current"]
+                
+                try:
+                    # 绘制时间-电流曲线
+                    self.canvas.clear()
+                    self.canvas.plot_xy(plot_time, plot_current, "时间 (s)", "电流 (A)", f"实时电流 (V={v:.2f}V)")
+                    
+                    # 强制更新画布
+                    QtWidgets.QApplication.processEvents()
+                    
+                    # 数据足够时启用保存和导出按钮
+                    if len(data["time"]) >= 5:  # 至少有5个数据点才启用
+                        if hasattr(self, 'pushButtonSaveRealtime'):
+                            self.pushButtonSaveRealtime.setEnabled(True)
+                        if hasattr(self, 'pushButtonExportRealtime'):
+                            self.pushButtonExportRealtime.setEnabled(True)
+                        if hasattr(self, 'pushButtonClearRealtime'):
+                            self.pushButtonClearRealtime.setEnabled(True)
+                    
+                except Exception as plot_error:
+                    print(f"绘图出错: {str(plot_error)}")
+                    # 尝试重建画布
+                    try:
+                        self.canvas.clear()
+                        QtWidgets.QApplication.processEvents()
+                    except:
+                        pass
+        except Exception as e:
+            print(f"处理实时数据时出错: {str(e)}")
+            
+    def _enable_data_functions(self):
+        """启用数据相关功能按钮"""
+        # 只有当有足够的数据时才启用
+        if (hasattr(self, 'realtime_thread') and 
+            hasattr(self.realtime_thread, 'time_data') and 
+            len(self.realtime_thread.time_data) >= 5):
+            
+            if hasattr(self, 'pushButtonSaveRealtime'):
+                self.pushButtonSaveRealtime.setEnabled(True)
+            if hasattr(self, 'pushButtonExportRealtime'):
+                self.pushButtonExportRealtime.setEnabled(True)
+                
+        # 清除按钮总是可用
+        if hasattr(self, 'pushButtonClearRealtime'):
+            self.pushButtonClearRealtime.setEnabled(True)
 
 
 # noinspection PyUnresolvedReferences
