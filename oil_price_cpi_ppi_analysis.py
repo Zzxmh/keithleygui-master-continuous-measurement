@@ -1,11 +1,11 @@
 """
 Oil Price Impact on CPI and PPI: Direct and Indirect Effects
 =============================================================
-Analysis for China, USA, Japan, and Vietnam
+Analysis for China, USA, Japan, Vietnam, and South Korea
 
 This script calculates the direct and indirect effects of a 10% oil price
 increase on CPI (Consumer Price Index) and PPI (Producer Price Index) for
-four countries, using parameters calibrated from 2023-2026 academic research
+five countries, using parameters calibrated from 2023-2026 academic research
 and official statistical data.
 
 Methodology:
@@ -32,6 +32,10 @@ Key References (2023+):
     impacts from energy price shocks in Southeast Asia"
 [8] Fed FEDS Notes (2024.08): "Oil Price Shocks and Inflation in a DSGE
     Model of the Global Economy"
+[9] KDI (2024): "최근 유가 상승의 국내 경제 파급효과"
+[10] 현대경제연구원 (2024): 유가 100달러 시 물가 1.1%p 상승 분석
+[11] Journal of Asian Economics (2025, Vol.96): "The inflationary impact of
+     oil price shock in Korea: The role of inflation expectations"
 """
 
 import numpy as np
@@ -58,6 +62,16 @@ plt.rcParams.update({
 })
 
 plt.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif']
+
+COUNTRY_ORDER = ["China", "USA", "Japan", "Vietnam", "South Korea"]
+COUNTRY_COLORS = {
+    'China': '#E53935', 'USA': '#1E88E5', 'Japan': '#43A047',
+    'Vietnam': '#FB8C00', 'South Korea': '#8E24AA',
+}
+COUNTRY_MARKERS = {
+    'China': 'o', 'USA': 's', 'Japan': '^',
+    'Vietnam': 'D', 'South Korea': 'P',
+}
 
 
 # ============================================================================
@@ -170,6 +184,39 @@ COUNTRIES = {
             "RMIT: Food & catering 33.56% of CPI, highly oil-sensitive",
             "EAP (2024): Southeast Asia energy price shock GTAP-E analysis",
             "GSO Vietnam: Logistics costs 10-15% of production costs",
+        ],
+    },
+    "South Korea": {
+        "cpi": {
+            # Petroleum products (석유류) ~5.2% of CPI (2022 rebase, Statistics Korea)
+            # Gasoline/diesel had largest weight increase in 2023 revision [1]
+            # KDI: oil+43%→CPI+0.5~0.8pp → ~0.15pp per 10% [9]
+            # 현대경제연구원: oil+43%→CPI+1.1pp → ~0.26pp per 10% [10]
+            # Weighted estimate: ~0.18pp per 10%, direct dominated
+            # Korea has highest oil intensity in OECD (5.63 bbl per $10K GDP)
+            "energy_weight_pct": 5.2,
+            "retail_passthrough": 0.35,
+            "direct_pp_per_10pct": 0.12,
+            "indirect_pp_per_10pct": 0.06,
+            "total_pp_per_10pct": 0.18,
+        },
+        "ppi": {
+            # Coal & petroleum products (석탄및석유제품) ~6% of PPI
+            # Broader energy-related sectors ~13% of PPI (BOK CGPI)
+            # Manufacturing-heavy economy amplifies oil-PPI transmission
+            # BOK WP (2023): global oil shocks have larger PPI than CPI effects
+            "energy_weight_pct": 13.0,
+            "retail_passthrough": 0.50,
+            "direct_pp_per_10pct": 0.35,
+            "indirect_pp_per_10pct": 0.15,
+            "total_pp_per_10pct": 0.50,
+        },
+        "sources": [
+            "Statistics Korea (2023): 2022 rebase - petroleum largest weight increase",
+            "KDI (2024): Oil+43%→CPI+0.5~0.8pp, production cost+0.7%",
+            "현대경제연구원 (2024): Oil $100/bbl→CPI+1.1pp, GDP-0.3pp",
+            "J. Asian Econ. (2025): Inflation expectations amplify oil shocks in Korea",
+            "Korea oil intensity: 5.63 bbl/$10K GDP, highest in OECD",
         ],
     },
 }
@@ -300,7 +347,7 @@ def plot_total_effects_comparison(df_base, save=True):
     fig, ax = plt.subplots(figsize=(10, 6))
 
     pivot = df_base.pivot(index='Country', columns='Index', values='Total Effect (pp)')
-    pivot = pivot.reindex(["China", "USA", "Japan", "Vietnam"])
+    pivot = pivot.reindex(COUNTRY_ORDER)
 
     x = np.arange(len(pivot.index))
     width = 0.35
@@ -339,18 +386,15 @@ def plot_scenario_analysis(df_scenarios, save=True):
     """Line charts showing CPI and PPI impacts under different oil price scenarios."""
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
-    colors = {'China': '#E53935', 'USA': '#1E88E5', 'Japan': '#43A047', 'Vietnam': '#FB8C00'}
-    markers = {'China': 'o', 'USA': 's', 'Japan': '^', 'Vietnam': 'D'}
-
     for idx, index_type in enumerate(["CPI", "PPI"]):
         ax = axes[idx]
         subset = df_scenarios[df_scenarios["Index"] == index_type]
 
-        for country in ["China", "USA", "Japan", "Vietnam"]:
+        for country in COUNTRY_ORDER:
             country_data = subset[subset["Country"] == country].sort_values("Oil Change (%)")
             ax.plot(country_data["Oil Change (%)"], country_data["Total Effect (pp)"],
-                    marker=markers[country], label=country, color=colors[country],
-                    linewidth=2, markersize=7)
+                    marker=COUNTRY_MARKERS[country], label=country,
+                    color=COUNTRY_COLORS[country], linewidth=2, markersize=7)
 
         ax.set_xlabel('Oil Price Increase (%)')
         ax.set_ylabel('Total Effect (percentage points)')
@@ -373,7 +417,7 @@ def plot_effect_decomposition_stacked(df_base, save=True):
     for idx, index_type in enumerate(["CPI", "PPI"]):
         ax = axes[idx]
         subset = df_base[df_base["Index"] == index_type].copy()
-        subset = subset.set_index("Country").reindex(["China", "USA", "Japan", "Vietnam"])
+        subset = subset.set_index("Country").reindex(COUNTRY_ORDER)
 
         direct = subset["Direct Effect (pp)"].values
         indirect = subset["Indirect Effect (pp)"].values
@@ -416,11 +460,11 @@ def plot_effect_decomposition_stacked(df_base, save=True):
 
 def plot_direct_share_pie(df_base, save=True):
     """Pie charts showing direct vs indirect share for each country-index pair."""
-    fig, axes = plt.subplots(2, 4, figsize=(16, 8))
+    fig, axes = plt.subplots(2, 5, figsize=(20, 8))
 
     colors_pair = ['#2196F3', '#FF9800']
 
-    for col_idx, country in enumerate(["China", "USA", "Japan", "Vietnam"]):
+    for col_idx, country in enumerate(COUNTRY_ORDER):
         for row_idx, index_type in enumerate(["CPI", "PPI"]):
             ax = axes[row_idx][col_idx]
             row = df_base[(df_base["Country"] == country) & (df_base["Index"] == index_type)].iloc[0]
@@ -460,7 +504,7 @@ def plot_heatmap(df_base, save=True):
     for idx, effect_col in enumerate(["Direct Effect (pp)", "Indirect Effect (pp)", "Total Effect (pp)"]):
         ax = axes[idx]
         pivot = df_base.pivot(index='Country', columns='Index', values=effect_col)
-        pivot = pivot.reindex(["China", "USA", "Japan", "Vietnam"])
+        pivot = pivot.reindex(COUNTRY_ORDER)
 
         sns.heatmap(pivot, annot=True, fmt='.3f', cmap='YlOrRd', ax=ax,
                     linewidths=0.5, linecolor='white',
@@ -485,7 +529,7 @@ def generate_report(df_base, df_scenarios):
     report = []
     report.append("=" * 80)
     report.append("OIL PRICE IMPACT ON CPI AND PPI: DIRECT AND INDIRECT EFFECTS")
-    report.append("Analysis for China, USA, Japan, and Vietnam")
+    report.append("Analysis for China, USA, Japan, Vietnam, and South Korea")
     report.append("Based on 2023-2026 Research and Data")
     report.append("=" * 80)
 
@@ -520,7 +564,7 @@ Parameters are calibrated from the following 2023+ sources:
     report.append("PART 2: BASELINE RESULTS (10% OIL PRICE INCREASE)")
     report.append("=" * 80)
 
-    for country in ["China", "USA", "Japan", "Vietnam"]:
+    for country in COUNTRY_ORDER:
         report.append(f"\n{'─' * 60}")
         report.append(f"  {country}")
         report.append(f"{'─' * 60}")
@@ -564,17 +608,17 @@ Parameters are calibrated from the following 2023+ sources:
         report.append(f"\n  Scenario: {scenario} (Oil price +{oil_chg:.0f}%)")
         report.append(f"  {'Country':<12s} {'CPI Total (pp)':>15s} {'PPI Total (pp)':>15s}")
         report.append(f"  {'─'*42}")
-        for country in ["China", "USA", "Japan", "Vietnam"]:
+        for country in COUNTRY_ORDER:
             cpi_val = subset[(subset["Country"] == country) & (subset["Index"] == "CPI")]["Total Effect (pp)"].iloc[0]
             ppi_val = subset[(subset["Country"] == country) & (subset["Index"] == "PPI")]["Total Effect (pp)"].iloc[0]
-            report.append(f"  {country:<12s} {cpi_val:>+14.4f}  {ppi_val:>+14.4f}")
+            report.append(f"  {country:<14s} {cpi_val:>+14.4f}  {ppi_val:>+14.4f}")
 
     report.append("\n\n" + "=" * 80)
     report.append("PART 5: KEY FINDINGS AND INTERPRETATION")
     report.append("=" * 80)
     report.append("""
 1. PPI SENSITIVITY > CPI SENSITIVITY:
-   Across all four countries, PPI is more sensitive to oil price changes than
+   Across all five countries, PPI is more sensitive to oil price changes than
    CPI. This reflects the higher energy weight in production costs compared
    to consumer baskets, and the incomplete pass-through from producers to
    consumers due to market competition and price stickiness.
@@ -585,28 +629,37 @@ Parameters are calibrated from the following 2023+ sources:
    basket share (33.56%) that amplifies indirect effects through agricultural
    input costs, and (c) heavy reliance on imported refined petroleum.
 
-3. JAPAN'S PPI VULNERABILITY:
-   Despite moderate CPI impact (partly due to government energy subsidies),
-   Japan's PPI is highly sensitive due to near-complete import dependence
-   for oil and high energy intensity in manufacturing.
+3. SOUTH KOREA'S STRUCTURAL VULNERABILITY:
+   South Korea has the highest oil intensity in the OECD (5.63 barrels per
+   $10K GDP) with renewable energy at only 9% (vs OECD avg 33%). CPI impact
+   (+0.18pp per 10% oil) is moderate but PPI impact (+0.50pp) is significant,
+   reflecting its manufacturing-heavy economy. Over 70% of oil imports pass
+   through the Strait of Hormuz, creating geopolitical supply risk.
 
-4. CHINA AND USA SHOW SIMILAR CPI IMPACT:
+4. JAPAN'S PPI VULNERABILITY:
+   Despite the lowest CPI impact (+0.10pp, partly due to government energy
+   subsidies), Japan's PPI is highly sensitive (+0.55pp) due to near-complete
+   import dependence for oil and high energy intensity in manufacturing.
+
+5. CHINA AND USA SHOW SIMILAR CPI IMPACT:
    Both countries show ~0.15 pp CPI increase per 10% oil rise, but through
    different mechanisms: China's lower energy weight is offset by higher
    fuel pass-through (regulated pricing), while the US has higher energy
    weight but broader monetary policy dampening of second-round effects.
 
-5. DIRECT VS INDIRECT DECOMPOSITION:
-   - For CPI: Indirect effects are relatively larger, especially for Vietnam
-     and Japan, reflecting supply chain transmission and food price channels.
-   - For PPI: Direct effects dominate due to the large energy input share
-     in production, with the direct-to-total ratio typically above 60%.
+6. DIRECT VS INDIRECT DECOMPOSITION:
+   - For CPI: Direct effects typically account for 60-80% of total impact.
+     Indirect effects are proportionally largest for Vietnam and Japan (~40%),
+     reflecting supply chain transmission and food price channels.
+   - For PPI: Direct effects dominate (69-75%) due to the large energy input
+     share in production.
 
-6. NON-LINEARITY (from literature):
-   Recent NARDL evidence [Energy, 2024] shows asymmetric effects in China -
-   oil price increases have larger PPI impacts than equivalent decreases.
-   The Fed (2023) finds second-round effects accumulate over 8 quarters,
-   suggesting sustained rather than one-time impacts.
+7. NON-LINEARITY (from literature):
+   - NARDL evidence [Energy, 2024] shows asymmetric effects in China: oil
+     price increases have larger PPI impacts than equivalent decreases.
+   - Korean research [J. Asian Econ., 2025] finds that inflation expectations
+     amplify oil shocks during high-inflation periods.
+   - The Fed (2023) finds second-round effects accumulate over 8 quarters.
 """)
 
     report.append("=" * 80)
@@ -649,6 +702,22 @@ Parameters are calibrated from the following 2023+ sources:
 
 [10] BOJ (2024). Producer Price Index Chain-weighted Weights Update.
      https://www.boj.or.jp/en/statistics/outline/notice_2024/not240116a.htm
+
+[11] KDI (2024). "최근 유가 상승의 국내 경제 파급효과."
+     https://www.kdi.re.kr/share/pressView?bd_no=4052
+
+[12] 현대경제연구원 (2024). "유가 100달러 시 물가 1.1%p 상승 압력."
+     https://biz.heraldcorp.com/article/10685687
+
+[13] Journal of Asian Economics, Vol.96 (2025). "The inflationary impact of
+     oil price shock in Korea: The role of inflation expectations."
+     https://ideas.repec.org/a/eee/asieco/v96y2025ics1049007824001568.html
+
+[14] Statistics Korea (2023). 2022년 기준 소비자물가지수 가중치 개편 결과.
+     https://kostat.go.kr/board.es?act=view&bid=213&list_no=428549
+
+[15] Citibank (2026). Korea GDP/CPI impact from sustained oil price increase.
+     https://en.yna.co.kr/view/AEN20260303003400320
 """)
 
     return "\n".join(report)

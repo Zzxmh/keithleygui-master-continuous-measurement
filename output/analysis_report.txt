@@ -1,6 +1,6 @@
 ================================================================================
 OIL PRICE IMPACT ON CPI AND PPI: DIRECT AND INDIRECT EFFECTS
-Analysis for China, USA, Japan, and Vietnam
+Analysis for China, USA, Japan, Vietnam, and South Korea
 Based on 2023-2026 Research and Data
 ================================================================================
 
@@ -130,6 +130,31 @@ PART 2: BASELINE RESULTS (10% OIL PRICE INCREASE)
     - EAP (2024): Southeast Asia energy price shock GTAP-E analysis
     - GSO Vietnam: Logistics costs 10-15% of production costs
 
+────────────────────────────────────────────────────────────
+  South Korea
+────────────────────────────────────────────────────────────
+
+  CPI:
+    Energy Weight in Basket:     5.2%
+    Retail Pass-through Rate:    35%
+    Direct Effect:               +0.1200 pp  (66.7% of total)
+    Indirect Effect:             +0.0600 pp  (33.3% of total)
+    Total Effect:                +0.1800 pp
+
+  PPI:
+    Energy Weight in Basket:     13.0%
+    Retail Pass-through Rate:    50%
+    Direct Effect:               +0.3500 pp  (70.0% of total)
+    Indirect Effect:             +0.1500 pp  (30.0% of total)
+    Total Effect:                +0.5000 pp
+
+  Sources:
+    - Statistics Korea (2023): 2022 rebase - petroleum largest weight increase
+    - KDI (2024): Oil+43%→CPI+0.5~0.8pp, production cost+0.7%
+    - 현대경제연구원 (2024): Oil $100/bbl→CPI+1.1pp, GDP-0.3pp
+    - J. Asian Econ. (2025): Inflation expectations amplify oil shocks in Korea
+    - Korea oil intensity: 5.63 bbl/$10K GDP, highest in OECD
+
 
 ================================================================================
 PART 3: CROSS-COUNTRY COMPARISON
@@ -137,15 +162,17 @@ PART 3: CROSS-COUNTRY COMPARISON
 
   CPI Impact Ranking (10% oil increase):
     1.    Vietnam: +0.2000 pp (Direct: 60%, Indirect: 40%)
-    2.      China: +0.1500 pp (Direct: 80%, Indirect: 20%)
-    3.        USA: +0.1500 pp (Direct: 67%, Indirect: 33%)
-    4.      Japan: +0.1000 pp (Direct: 60%, Indirect: 40%)
+    2. South Korea: +0.1800 pp (Direct: 67%, Indirect: 33%)
+    3.      China: +0.1500 pp (Direct: 80%, Indirect: 20%)
+    4.        USA: +0.1500 pp (Direct: 67%, Indirect: 33%)
+    5.      Japan: +0.1000 pp (Direct: 60%, Indirect: 40%)
 
   PPI Impact Ranking (10% oil increase):
     1.    Vietnam: +0.6500 pp (Direct: 69%, Indirect: 31%)
     2.      Japan: +0.5500 pp (Direct: 73%, Indirect: 27%)
-    3.        USA: +0.4000 pp (Direct: 75%, Indirect: 25%)
-    4.      China: +0.3500 pp (Direct: 71%, Indirect: 29%)
+    3. South Korea: +0.5000 pp (Direct: 70%, Indirect: 30%)
+    4.        USA: +0.4000 pp (Direct: 75%, Indirect: 25%)
+    5.      China: +0.3500 pp (Direct: 71%, Indirect: 29%)
 
 
 ================================================================================
@@ -155,34 +182,38 @@ PART 4: SCENARIO ANALYSIS
   Scenario: Mild (+10%) (Oil price +10%)
   Country       CPI Total (pp)  PPI Total (pp)
   ──────────────────────────────────────────
-  China               +0.1500         +0.3500
-  USA                 +0.1500         +0.4000
-  Japan               +0.1000         +0.5500
-  Vietnam             +0.2000         +0.6500
+  China                 +0.1500         +0.3500
+  USA                   +0.1500         +0.4000
+  Japan                 +0.1000         +0.5500
+  Vietnam               +0.2000         +0.6500
+  South Korea           +0.1800         +0.5000
 
   Scenario: Moderate (+30%) (Oil price +30%)
   Country       CPI Total (pp)  PPI Total (pp)
   ──────────────────────────────────────────
-  China               +0.4500         +1.0500
-  USA                 +0.4500         +1.2000
-  Japan               +0.3000         +1.6500
-  Vietnam             +0.6000         +1.9500
+  China                 +0.4500         +1.0500
+  USA                   +0.4500         +1.2000
+  Japan                 +0.3000         +1.6500
+  Vietnam               +0.6000         +1.9500
+  South Korea           +0.5400         +1.5000
 
   Scenario: Severe (+50%) (Oil price +50%)
   Country       CPI Total (pp)  PPI Total (pp)
   ──────────────────────────────────────────
-  China               +0.7500         +1.7500
-  USA                 +0.7500         +2.0000
-  Japan               +0.5000         +2.7500
-  Vietnam             +1.0000         +3.2500
+  China                 +0.7500         +1.7500
+  USA                   +0.7500         +2.0000
+  Japan                 +0.5000         +2.7500
+  Vietnam               +1.0000         +3.2500
+  South Korea           +0.9000         +2.5000
 
   Scenario: Extreme (+100%) (Oil price +100%)
   Country       CPI Total (pp)  PPI Total (pp)
   ──────────────────────────────────────────
-  China               +1.5000         +3.5000
-  USA                 +1.5000         +4.0000
-  Japan               +1.0000         +5.5000
-  Vietnam             +2.0000         +6.5000
+  China                 +1.5000         +3.5000
+  USA                   +1.5000         +4.0000
+  Japan                 +1.0000         +5.5000
+  Vietnam               +2.0000         +6.5000
+  South Korea           +1.8000         +5.0000
 
 
 ================================================================================
@@ -190,7 +221,7 @@ PART 5: KEY FINDINGS AND INTERPRETATION
 ================================================================================
 
 1. PPI SENSITIVITY > CPI SENSITIVITY:
-   Across all four countries, PPI is more sensitive to oil price changes than
+   Across all five countries, PPI is more sensitive to oil price changes than
    CPI. This reflects the higher energy weight in production costs compared
    to consumer baskets, and the incomplete pass-through from producers to
    consumers due to market competition and price stickiness.
@@ -201,28 +232,37 @@ PART 5: KEY FINDINGS AND INTERPRETATION
    basket share (33.56%) that amplifies indirect effects through agricultural
    input costs, and (c) heavy reliance on imported refined petroleum.
 
-3. JAPAN'S PPI VULNERABILITY:
-   Despite moderate CPI impact (partly due to government energy subsidies),
-   Japan's PPI is highly sensitive due to near-complete import dependence
-   for oil and high energy intensity in manufacturing.
+3. SOUTH KOREA'S STRUCTURAL VULNERABILITY:
+   South Korea has the highest oil intensity in the OECD (5.63 barrels per
+   $10K GDP) with renewable energy at only 9% (vs OECD avg 33%). CPI impact
+   (+0.18pp per 10% oil) is moderate but PPI impact (+0.50pp) is significant,
+   reflecting its manufacturing-heavy economy. Over 70% of oil imports pass
+   through the Strait of Hormuz, creating geopolitical supply risk.
 
-4. CHINA AND USA SHOW SIMILAR CPI IMPACT:
+4. JAPAN'S PPI VULNERABILITY:
+   Despite the lowest CPI impact (+0.10pp, partly due to government energy
+   subsidies), Japan's PPI is highly sensitive (+0.55pp) due to near-complete
+   import dependence for oil and high energy intensity in manufacturing.
+
+5. CHINA AND USA SHOW SIMILAR CPI IMPACT:
    Both countries show ~0.15 pp CPI increase per 10% oil rise, but through
    different mechanisms: China's lower energy weight is offset by higher
    fuel pass-through (regulated pricing), while the US has higher energy
    weight but broader monetary policy dampening of second-round effects.
 
-5. DIRECT VS INDIRECT DECOMPOSITION:
-   - For CPI: Indirect effects are relatively larger, especially for Vietnam
-     and Japan, reflecting supply chain transmission and food price channels.
-   - For PPI: Direct effects dominate due to the large energy input share
-     in production, with the direct-to-total ratio typically above 60%.
+6. DIRECT VS INDIRECT DECOMPOSITION:
+   - For CPI: Direct effects typically account for 60-80% of total impact.
+     Indirect effects are proportionally largest for Vietnam and Japan (~40%),
+     reflecting supply chain transmission and food price channels.
+   - For PPI: Direct effects dominate (69-75%) due to the large energy input
+     share in production.
 
-6. NON-LINEARITY (from literature):
-   Recent NARDL evidence [Energy, 2024] shows asymmetric effects in China -
-   oil price increases have larger PPI impacts than equivalent decreases.
-   The Fed (2023) finds second-round effects accumulate over 8 quarters,
-   suggesting sustained rather than one-time impacts.
+7. NON-LINEARITY (from literature):
+   - NARDL evidence [Energy, 2024] shows asymmetric effects in China: oil
+     price increases have larger PPI impacts than equivalent decreases.
+   - Korean research [J. Asian Econ., 2025] finds that inflation expectations
+     amplify oil shocks during high-inflation periods.
+   - The Fed (2023) finds second-round effects accumulate over 8 quarters.
 
 ================================================================================
 REFERENCES
@@ -264,3 +304,19 @@ REFERENCES
 
 [10] BOJ (2024). Producer Price Index Chain-weighted Weights Update.
      https://www.boj.or.jp/en/statistics/outline/notice_2024/not240116a.htm
+
+[11] KDI (2024). "최근 유가 상승의 국내 경제 파급효과."
+     https://www.kdi.re.kr/share/pressView?bd_no=4052
+
+[12] 현대경제연구원 (2024). "유가 100달러 시 물가 1.1%p 상승 압력."
+     https://biz.heraldcorp.com/article/10685687
+
+[13] Journal of Asian Economics, Vol.96 (2025). "The inflationary impact of
+     oil price shock in Korea: The role of inflation expectations."
+     https://ideas.repec.org/a/eee/asieco/v96y2025ics1049007824001568.html
+
+[14] Statistics Korea (2023). 2022년 기준 소비자물가지수 가중치 개편 결과.
+     https://kostat.go.kr/board.es?act=view&bid=213&list_no=428549
+
+[15] Citibank (2026). Korea GDP/CPI impact from sustained oil price increase.
+     https://en.yna.co.kr/view/AEN20260303003400320
