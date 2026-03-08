@@ -1,0 +1,191 @@
+================================================================================
+DETAILED ANALYSIS: 100% OIL PRICE INCREASE SCENARIO
+(e.g. Brent crude from $70/bbl to $140/bbl)
+================================================================================
+
+Methodology Note:
+  Base parameters are calibrated per 10% oil increase from empirical studies,
+  then scaled 10x for the 100% scenario. A non-linear amplification factor of
+  1.15x is applied to indirect effects, reflecting:
+    - Intensified inflation expectations at extreme oil shocks
+    - Supply chain disruption cascades
+    - Government subsidy exhaustion
+  Empirical validation: NRI Japan (+109% shock), 현대경제연구원 Korea (+114% shock),
+  and Fed DSGE (2024) models confirm roughly linear direct effects with modestly
+  amplified second-round effects at large magnitudes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  China
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  CPI:
+    Energy Weight in Basket:         3.5%
+    Direct Effect:                   +1.200 pp  (77.7%)
+    Indirect Effect (linear):        +0.300 pp
+    Indirect Effect (amplified):     +0.345 pp  (22.3%)
+    Non-linear Uplift:               +0.045 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +1.500 pp
+    Total (with amplification):      +1.545 pp
+
+  PPI:
+    Energy Weight in Basket:         12.0%
+    Direct Effect:                   +2.500 pp  (68.5%)
+    Indirect Effect (linear):        +1.000 pp
+    Indirect Effect (amplified):     +1.150 pp  (31.5%)
+    Non-linear Uplift:               +0.150 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +3.500 pp
+    Total (with amplification):      +3.650 pp
+
+  Sources: 华创证券张瑜 (2026.03): 油价+10%→CPI+0.14~0.16pp, PPI+0.3~0.4pp; Energy (2024): NARDL model of asymmetric oil-PPI effects in China
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  USA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  CPI:
+    Energy Weight in Basket:         6.5%
+    Direct Effect:                   +1.000 pp  (63.5%)
+    Indirect Effect (linear):        +0.500 pp
+    Indirect Effect (amplified):     +0.575 pp  (36.5%)
+    Non-linear Uplift:               +0.075 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +1.500 pp
+    Total (with amplification):      +1.575 pp
+
+  PPI:
+    Energy Weight in Basket:         10.5%
+    Direct Effect:                   +3.000 pp  (72.3%)
+    Indirect Effect (linear):        +1.000 pp
+    Indirect Effect (amplified):     +1.150 pp  (27.7%)
+    Non-linear Uplift:               +0.150 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +4.000 pp
+    Total (with amplification):      +4.150 pp
+
+  Sources: BLS (2024): CPI energy weight 6.5%, gasoline 3.2%; FIU WP 2401 (2024): Oil pass-through ~7% to CPI, ~16% to PPI
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Japan
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  CPI:
+    Energy Weight in Basket:         7.0%
+    Direct Effect:                   +0.600 pp  (56.6%)
+    Indirect Effect (linear):        +0.400 pp
+    Indirect Effect (amplified):     +0.460 pp  (43.4%)
+    Non-linear Uplift:               +0.060 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +1.000 pp
+    Total (with amplification):      +1.060 pp
+
+  PPI:
+    Energy Weight in Basket:         14.0%
+    Direct Effect:                   +4.000 pp  (69.9%)
+    Indirect Effect (linear):        +1.500 pp
+    Indirect Effect (amplified):     +1.725 pp  (30.1%)
+    Non-linear Uplift:               +0.225 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +5.500 pp
+    Total (with amplification):      +5.725 pp
+
+  Sources: NRI/木内登英 (2026.03): Oil+30%→CPI+0.31pp → ~0.10pp per 10%; NRI (2024.04): Yen depreciation + oil price simulation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Vietnam
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  CPI:
+    Energy Weight in Basket:         9.7%
+    Direct Effect:                   +1.200 pp  (56.6%)
+    Indirect Effect (linear):        +0.800 pp
+    Indirect Effect (amplified):     +0.920 pp  (43.4%)
+    Non-linear Uplift:               +0.120 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +2.000 pp
+    Total (with amplification):      +2.120 pp
+
+  PPI:
+    Energy Weight in Basket:         15.5%
+    Direct Effect:                   +4.500 pp  (66.2%)
+    Indirect Effect (linear):        +2.000 pp
+    Indirect Effect (amplified):     +2.300 pp  (33.8%)
+    Non-linear Uplift:               +0.300 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +6.500 pp
+    Total (with amplification):      +6.800 pp
+
+  Sources: RMIT Vietnam (2023, 2025): Oil & transport ~9.67% of CPI basket; RMIT: Food & catering 33.56% of CPI, highly oil-sensitive
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  South Korea
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  CPI:
+    Energy Weight in Basket:         5.2%
+    Direct Effect:                   +1.200 pp  (63.5%)
+    Indirect Effect (linear):        +0.600 pp
+    Indirect Effect (amplified):     +0.690 pp  (36.5%)
+    Non-linear Uplift:               +0.090 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +1.800 pp
+    Total (with amplification):      +1.890 pp
+
+  PPI:
+    Energy Weight in Basket:         13.0%
+    Direct Effect:                   +3.500 pp  (67.0%)
+    Indirect Effect (linear):        +1.500 pp
+    Indirect Effect (amplified):     +1.725 pp  (33.0%)
+    Non-linear Uplift:               +0.225 pp
+    ─────────────────────────────────────────
+    Total (linear):                  +5.000 pp
+    Total (with amplification):      +5.225 pp
+
+  Sources: Statistics Korea (2023): 2022 rebase - petroleum largest weight increase; KDI (2024): Oil+43%→CPI+0.5~0.8pp, production cost+0.7%
+
+
+======================================================================
+CROSS-COUNTRY RANKING (Oil +100%, with non-linear amplification)
+======================================================================
+
+  CPI Impact Ranking:
+    1.        Vietnam: +2.120 pp (Direct 57% / Indirect 43%)
+    2.    South Korea: +1.890 pp (Direct 64% / Indirect 36%)
+    3.            USA: +1.575 pp (Direct 64% / Indirect 36%)
+    4.          China: +1.545 pp (Direct 78% / Indirect 22%)
+    5.          Japan: +1.060 pp (Direct 57% / Indirect 43%)
+
+  PPI Impact Ranking:
+    1.        Vietnam: +6.800 pp (Direct 66% / Indirect 34%)
+    2.          Japan: +5.725 pp (Direct 70% / Indirect 30%)
+    3.    South Korea: +5.225 pp (Direct 67% / Indirect 33%)
+    4.            USA: +4.150 pp (Direct 72% / Indirect 28%)
+    5.          China: +3.650 pp (Direct 68% / Indirect 32%)
+
+
+======================================================================
+REAL-WORLD CONTEXT
+======================================================================
+
+  Historical parallels for a 100% oil price increase:
+    - 2007-2008: Brent rose from $72 to $147 (+104%), contributing to the
+      global financial crisis and stagflationary pressures.
+    - 2020-2022: WTI rose from $40 to $120 (+200%), with peak US CPI
+      reaching 9.1% in June 2022.
+
+  At current levels (Brent ~$70-75/bbl in early 2026), a 100% increase
+  would imply $140-150/bbl, exceeding the 2022 peak of ~$130.
+
+  Country-specific implications:
+    - China: CPI center would rise to ~1.6% (from ~0.9% base), PPI to ~1.5%
+      [华创证券, 2026 projection at $108/bbl]
+    - USA: CPI center would approach 3.5%, with gasoline retail exceeding
+      $4/gallon, creating significant consumer spending headwinds
+    - Japan: Stagflationary risk as CPI rises while GDP contracts ~0.65%
+      [NRI, 2026 extreme scenario at $140/bbl]
+    - Vietnam: GDP could decline 1.0-3.8% depending on shock persistence
+      [EAP GTAP-E model, 2024]
+    - South Korea: GDP growth may shed 0.45pp+ [Citibank, 2026]; highest
+      OECD oil intensity makes Korea especially vulnerable
